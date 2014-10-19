@@ -4,33 +4,27 @@ if !exists("g:rspec_runner")
   let g:rspec_runner = "os_x_terminal"
 endif
 
-if exists("g:rspec_command")
-  if has("gui_running") && has("gui_macvim")
-    let s:rspec_command = "silent !" . s:plugin_path . "/bin/" . g:rspec_runner . " '" . g:rspec_command . "'"
-  else
-    let s:rspec_command = g:rspec_command
-  endif
-else
-  let s:cmd = "rspec {spec}"
-
-  if has("gui_running") && has("gui_macvim")
-    let s:rspec_command = "silent !" . s:plugin_path . "/bin/" . g:rspec_runner . " '" . s:cmd . "'"
-  elseif has("win32") && fnamemodify(&shell, ':t') ==? "cmd.exe"
-    let s:rspec_command = "!cls && echo " . s:cmd . " && " . s:cmd
-  else
-    let s:rspec_command = "!clear && echo " . s:cmd . " && " . s:cmd
-  endif
-endif
+let s:rspec_command = g:rspec_command
 
 function! RunAllSpecs()
-  let l:spec = "spec"
+  if InSpecFile()
+    let l:spec = "rspec"
+  elseif InFeatureFile()
+    let l:spec = "cucumber"
+  else
+    let l:spec = "cucumber; rspec"
+  end
   call SetLastSpecCommand(l:spec)
   call RunSpecs(l:spec)
 endfunction
 
 function! RunCurrentSpecFile()
   if InSpecFile()
-    let l:spec = @%
+    let l:spec = "rspec " . @%
+    call SetLastSpecCommand(l:spec)
+    call RunSpecs(l:spec)
+  elseif InFeatureFile()
+    let l:spec = "cucumber " . @%
     call SetLastSpecCommand(l:spec)
     call RunSpecs(l:spec)
   else
@@ -40,7 +34,11 @@ endfunction
 
 function! RunNearestSpec()
   if InSpecFile()
-    let l:spec = @% . ":" . line(".")
+    let l:spec = "rspec " . @% . ":" . line(".")
+    call SetLastSpecCommand(l:spec)
+    call RunSpecs(l:spec)
+  elseif InFeatureFile()
+    let l:spec = "cucumber " . @% . ":" . line(".")
     call SetLastSpecCommand(l:spec)
     call RunSpecs(l:spec)
   else
@@ -52,6 +50,10 @@ function! RunLastSpec()
   if exists("s:last_spec_command")
     call RunSpecs(s:last_spec_command)
   endif
+endfunction
+
+function! InFeatureFile()
+  return match(expand("%"), ".feature$") != -1
 endfunction
 
 function! InSpecFile()
