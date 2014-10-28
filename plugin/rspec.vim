@@ -7,13 +7,19 @@ endif
 let s:rspec_command = g:rspec_command
 
 function! RunAllSpecs()
-  if InSpecFile()
-    let l:spec = "rspec"
-  elseif InFeatureFile()
-    let l:spec = "cucumber"
-  else
-    let l:spec = "cucumber; rspec"
-  end
+  let l:spec = "cucumber; rspec"
+  call SetLastSpecCommand(l:spec)
+  call RunSpecs(l:spec)
+endfunction
+
+function! RunAllRSpecs()
+  let l:spec = "rspec"
+  call SetLastSpecCommand(l:spec)
+  call RunSpecs(l:spec)
+endfunction
+
+function! RunAllCucumbers()
+  let l:spec = "cucumber"
   call SetLastSpecCommand(l:spec)
   call RunSpecs(l:spec)
 endfunction
