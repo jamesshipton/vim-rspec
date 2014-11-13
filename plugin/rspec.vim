@@ -30,7 +30,7 @@ function! RunCurrentSpecFile()
     call SetLastSpecCommand(l:spec)
     call RunSpecs(l:spec)
   elseif InFeatureFile()
-    let l:spec = "cucumber " . @%
+    let l:spec = "cucumber -r features " . @%
     call SetLastSpecCommand(l:spec)
     call RunSpecs(l:spec)
   else
@@ -44,7 +44,7 @@ function! RunNearestSpec()
     call SetLastSpecCommand(l:spec)
     call RunSpecs(l:spec)
   elseif InFeatureFile()
-    let l:spec = "cucumber " . @% . ":" . line(".")
+    let l:spec = "cucumber -r features " . @% . ":" . line(".")
     call SetLastSpecCommand(l:spec)
     call RunSpecs(l:spec)
   else
